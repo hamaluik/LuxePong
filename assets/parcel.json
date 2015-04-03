@@ -1,0 +1,9 @@
+{
+    "textures" : [
+    ],
+    "fonts" : [        
+        { "id" : "assets/font/montez/montez.fnt" }
+    ],
+    "sounds" : [
+    ]
+}

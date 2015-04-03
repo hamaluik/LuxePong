@@ -1,0 +1,23 @@
+{
+  project : {
+    name : 'LuxePong',
+    version : '0.0.1',
+    author : 'FuzzyWuzzie',
+
+    app : {
+      name : 'LuxePong',
+      package : 'com.blazingmammothgames.luxe'
+    },
+
+    build : {
+      dependencies : {
+        luxe : '*'
+      }
+    },
+
+    files : {
+      assets : 'assets/'
+    }
+
+  }
+}
