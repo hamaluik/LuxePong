@@ -16,19 +16,20 @@ class Main extends luxe.Game {
 
 	override function ready() {
 		// load up the parcel
-		var parcelJSON = Luxe.loadJSON("assets/parcel.json");
-		var parcel = new luxe.Parcel();
-		parcel.from_json(parcelJSON);
+		Luxe.loadJSON("assets/parcel.json", function(parcelJSON) {
+			var parcel = new luxe.Parcel();
+			parcel.from_json(parcelJSON.json);
 
-		// show a loading bar
-		new ParcelProgress({
-			parcel: parcel,
-			background: new Color(1, 0, 0, 1),
-			oncomplete: assetsLoaded
+			// show a loading bar
+			new ParcelProgress({
+				parcel: parcel,
+				background: new Color(1, 0, 0, 1),
+				oncomplete: assetsLoaded
+			});
+
+			// load it!
+			parcel.load();
 		});
-
-		// load it!
-		parcel.load();
 	} //ready
 
 	function assetsLoaded(_) {
@@ -44,7 +45,7 @@ class Main extends luxe.Game {
 		log("Done!");
 		
 		// grab the custom font
-		titleFont = Luxe.resources.find_font('montez.fnt');
+		titleFont = Luxe.resources.find_font('assets/font/montez/montez.fnt');
 		log("Font is null: " + (titleFont == null));
 
 		// create the title text

@@ -503,27 +503,29 @@ Main.__name__ = ["Main"];
 Main.__super__ = luxe_Game;
 Main.prototype = $extend(luxe_Game.prototype,{
 	ready: function() {
-		var parcelJSON = Luxe.loadJSON("assets/parcel.json");
-		var parcel = new luxe_Parcel();
-		parcel.from_json(parcelJSON);
-		new luxe_ParcelProgress({ parcel : parcel, background : new phoenix_Color(1,0,0,1), oncomplete : $bind(this,this.assetsLoaded)});
-		parcel.load();
+		var _g = this;
+		Luxe.loadJSON("assets/parcel.json",function(parcelJSON) {
+			var parcel = new luxe_Parcel();
+			parcel.from_json(parcelJSON.json);
+			new luxe_ParcelProgress({ parcel : parcel, background : new phoenix_Color(1,0,0,1), oncomplete : $bind(_g,_g.assetsLoaded)});
+			parcel.load();
+		});
 	}
 	,assetsLoaded: function(_) {
 		this.createTitle();
 		this.createBlock();
 	}
 	,createTitle: function() {
-		haxe_Log.trace("     i / main / " + "Listing fonts:",{ fileName : "Main.hx", lineNumber : 40, className : "Main", methodName : "createTitle"});
+		haxe_Log.trace("     i / main / " + "Listing fonts:",{ fileName : "Main.hx", lineNumber : 41, className : "Main", methodName : "createTitle"});
 		var $it0 = Luxe.resources.fonts.keys();
 		while( $it0.hasNext() ) {
 			var fnt = $it0.next();
-			haxe_Log.trace("     i / main / " + ("  " + fnt),{ fileName : "Main.hx", lineNumber : 42, className : "Main", methodName : "createTitle"});
+			haxe_Log.trace("     i / main / " + ("  " + fnt),{ fileName : "Main.hx", lineNumber : 43, className : "Main", methodName : "createTitle"});
 		}
-		haxe_Log.trace("     i / main / " + "Done!",{ fileName : "Main.hx", lineNumber : 44, className : "Main", methodName : "createTitle"});
-		this.titleFont = Luxe.resources.find_font("montez.fnt");
-		haxe_Log.trace("     i / main / " + ("Font is null: " + Std.string(this.titleFont == null)),{ fileName : "Main.hx", lineNumber : 48, className : "Main", methodName : "createTitle"});
-		this.titleText = new luxe_Text({ font : this.titleFont, text : "Pong", depth : 1.5, align : 2, align_vertical : 2, point_size : 96, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y - 100), color : new phoenix_Color().rgb(16777215)},{ fileName : "Main.hx", lineNumber : 51, className : "Main", methodName : "createTitle"});
+		haxe_Log.trace("     i / main / " + "Done!",{ fileName : "Main.hx", lineNumber : 45, className : "Main", methodName : "createTitle"});
+		this.titleFont = Luxe.resources.find_font("assets/font/montez/montez.fnt");
+		haxe_Log.trace("     i / main / " + ("Font is null: " + Std.string(this.titleFont == null)),{ fileName : "Main.hx", lineNumber : 49, className : "Main", methodName : "createTitle"});
+		this.titleText = new luxe_Text({ font : this.titleFont, text : "Pong", depth : 1.5, align : 2, align_vertical : 2, point_size : 96, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y - 100), color : new phoenix_Color().rgb(16777215)},{ fileName : "Main.hx", lineNumber : 52, className : "Main", methodName : "createTitle"});
 	}
 	,createBlock: function() {
 		this.block = new luxe_Sprite({ name : "block", pos : Luxe.core.screen.get_mid(), color : new phoenix_Color().rgb(16337668), size : new phoenix_Vector(128,128)});
