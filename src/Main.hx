@@ -75,3 +75,12 @@ class Main extends luxe.Game {
 	}
 
 } //Main
+
+// Outputs:
+/*
+Input.hx:42:     i / input / Gamepads supported: true
+LuxePong.js:1635 Core.hx:110:      i / luxe / version 1.0.0-alpha.1+781304b460
+LuxePong.js:3587 Main.hx::40        i / main / Listing fonts:
+LuxePong.js:3587 Main.hx::44        i / main / Done!
+LuxePong.js:3587 Main.hx::48        i / main / Font is null: true
+*/
