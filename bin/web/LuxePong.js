@@ -6,6 +6,146 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var luxe_ID = function(_name,_id) {
+	if(_id == null) _id = "";
+	if(_name == null) _name = "";
+	this.name = "";
+	this.name = _name;
+	if(_id == "") this.id = Luxe.utils.uniqueid(); else this.id = _id;
+};
+luxe_ID.__name__ = ["luxe","ID"];
+luxe_ID.prototype = {
+	__class__: luxe_ID
+};
+var luxe_State = function(_options) {
+	this.inited = false;
+	this.enabled = false;
+	this.active = false;
+	luxe_ID.call(this,_options.name);
+};
+luxe_State.__name__ = ["luxe","State"];
+luxe_State.__super__ = luxe_ID;
+luxe_State.prototype = $extend(luxe_ID.prototype,{
+	enable: function(_enable_with) {
+		this.machine.enable(this.name,_enable_with);
+	}
+	,disable: function(_disable_with) {
+		this.machine.disable(this.name,_disable_with);
+	}
+	,destroy: function() {
+		this.machine.kill(this.name);
+	}
+	,init: function() {
+	}
+	,update: function(dt) {
+	}
+	,onfixedupdate: function() {
+	}
+	,onleave: function(d) {
+	}
+	,onenter: function(d) {
+	}
+	,onenabled: function(d) {
+	}
+	,ondisabled: function(d) {
+	}
+	,onadded: function() {
+	}
+	,onremoved: function() {
+	}
+	,onrender: function() {
+	}
+	,onprerender: function() {
+	}
+	,onpostrender: function() {
+	}
+	,onreset: function() {
+	}
+	,ondestroy: function() {
+	}
+	,onkeyup: function(event) {
+	}
+	,onkeydown: function(event) {
+	}
+	,ontextinput: function(event) {
+	}
+	,oninputdown: function(name,event) {
+	}
+	,oninputup: function(name,event) {
+	}
+	,onmousedown: function(event) {
+	}
+	,onmouseup: function(event) {
+	}
+	,onmousemove: function(event) {
+	}
+	,onmousewheel: function(event) {
+	}
+	,ontouchdown: function(event) {
+	}
+	,ontouchup: function(event) {
+	}
+	,ontouchmove: function(event) {
+	}
+	,ongamepadup: function(event) {
+	}
+	,ongamepaddown: function(event) {
+	}
+	,ongamepadaxis: function(event) {
+	}
+	,ongamepaddevice: function(event) {
+	}
+	,onwindowmoved: function(event) {
+	}
+	,onwindowresized: function(event) {
+	}
+	,onwindowsized: function(event) {
+	}
+	,onwindowminimized: function(event) {
+	}
+	,onwindowrestored: function(event) {
+	}
+	,_init: function() {
+		if(!this.inited) {
+			this.inited = true;
+			this.init();
+		}
+	}
+	,__class__: luxe_State
+});
+var Credits = function() {
+	luxe_State.call(this,{ name : "credits"});
+};
+Credits.__name__ = ["Credits"];
+Credits.__super__ = luxe_State;
+Credits.prototype = $extend(luxe_State.prototype,{
+	onenter: function(_) {
+		this.create_title();
+		this.create_credits();
+	}
+	,onleave: function(_) {
+		this.destroy_credits();
+		this.destroy_title();
+	}
+	,create_title: function() {
+		this.titleShader = Luxe.renderer.shaders.bitmapfont.shader.clone();
+		this.titleFont = Luxe.resources.find_font("assets/fonts/digital7.fnt");
+		this.titleText = new luxe_Text({ font : this.titleFont, text : "Pong - Credits", depth : 1.5, align : 2, align_vertical : 2, point_size : 96, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y - 178), color : new phoenix_Color(1,1,1,1), shader : this.titleShader, sdf : true},{ fileName : "Credits.hx", lineNumber : 39, className : "Credits", methodName : "create_title"});
+	}
+	,destroy_title: function() {
+		this.titleText.destroy();
+	}
+	,create_credits: function() {
+		this.creditsText = new luxe_Text({ font : this.titleFont, text : "Made by FuzzyWuzzie\n\nAs a learning excerise in Luxe\n\nClick to return", depth : 1.5, align : 2, align_vertical : 2, point_size : 48, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y), color : new phoenix_Color(1,1,1,1), shader : this.titleShader, sdf : true},{ fileName : "Credits.hx", lineNumber : 59, className : "Credits", methodName : "create_credits"});
+	}
+	,destroy_credits: function() {
+		this.creditsText.destroy();
+	}
+	,onmouseup: function(e) {
+		Main.fsm.set("menu",null,null,{ fileName : "Credits.hx", lineNumber : 79, className : "Credits", methodName : "onmouseup"});
+	}
+	,__class__: Credits
+});
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -507,35 +647,436 @@ Main.prototype = $extend(luxe_Game.prototype,{
 		Luxe.loadJSON("assets/parcel.json",function(parcelJSON) {
 			var parcel = new luxe_Parcel();
 			parcel.from_json(parcelJSON.json);
-			new luxe_ParcelProgress({ parcel : parcel, background : new phoenix_Color(1,0,0,1), oncomplete : $bind(_g,_g.assetsLoaded)});
+			new luxe_ParcelProgress({ parcel : parcel, background : new phoenix_Color(0.15,0.15,0.15,1), oncomplete : $bind(_g,_g.assetsLoaded)});
 			parcel.load();
 		});
 	}
 	,assetsLoaded: function(_) {
-		this.createTitle();
-		this.createBlock();
-	}
-	,createTitle: function() {
-		haxe_Log.trace("     i / main / " + "Listing fonts:",{ fileName : "Main.hx", lineNumber : 41, className : "Main", methodName : "createTitle"});
-		var $it0 = Luxe.resources.fonts.keys();
-		while( $it0.hasNext() ) {
-			var fnt = $it0.next();
-			haxe_Log.trace("     i / main / " + ("  " + fnt),{ fileName : "Main.hx", lineNumber : 43, className : "Main", methodName : "createTitle"});
-		}
-		haxe_Log.trace("     i / main / " + "Done!",{ fileName : "Main.hx", lineNumber : 45, className : "Main", methodName : "createTitle"});
-		this.titleFont = Luxe.resources.find_font("assets/font/montez/montez.fnt");
-		haxe_Log.trace("     i / main / " + ("Font is null: " + Std.string(this.titleFont == null)),{ fileName : "Main.hx", lineNumber : 49, className : "Main", methodName : "createTitle"});
-		this.titleText = new luxe_Text({ font : this.titleFont, text : "Pong", depth : 1.5, align : 2, align_vertical : 2, point_size : 96, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y - 100), color : new phoenix_Color().rgb(16777215)},{ fileName : "Main.hx", lineNumber : 52, className : "Main", methodName : "createTitle"});
-	}
-	,createBlock: function() {
-		this.block = new luxe_Sprite({ name : "block", pos : Luxe.core.screen.get_mid(), color : new phoenix_Color().rgb(16337668), size : new phoenix_Vector(128,128)});
-	}
-	,onmousemove: function(event) {
-		this.block.set_pos(event.pos);
+		Main.fsm = new luxe_States();
+		Main.fsm.add(new Menu());
+		Main.fsm.add(new Credits());
+		Main.fsm.add(new Play());
+		Main.fsm.set("play",null,null,{ fileName : "Main.hx", lineNumber : 37, className : "Main", methodName : "assetsLoaded"});
 	}
 	,__class__: Main
 });
 Math.__name__ = ["Math"];
+var Menu = function() {
+	this.currentSelection = "";
+	luxe_State.call(this,{ name : "menu"});
+};
+Menu.__name__ = ["Menu"];
+Menu.__super__ = luxe_State;
+Menu.prototype = $extend(luxe_State.prototype,{
+	onenter: function(_) {
+		this.create_title();
+		this.create_menu_items();
+	}
+	,onleave: function(_) {
+		this.destroy_menu_items();
+		this.destroy_title();
+	}
+	,create_title: function() {
+		this.titleShader = Luxe.renderer.shaders.bitmapfont.shader.clone();
+		this.titleFont = Luxe.resources.find_font("assets/fonts/digital7.fnt");
+		this.titleText = new luxe_Text({ font : this.titleFont, text : "Pong", depth : 1.5, align : 2, align_vertical : 2, point_size : 96, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y - 178), color : new phoenix_Color(1,1,1,1), sdf : true},{ fileName : "Menu.hx", lineNumber : 43, className : "Menu", methodName : "create_title"});
+	}
+	,destroy_title: function() {
+		this.titleText.destroy();
+	}
+	,create_menu_items: function() {
+		this.menuItems = new haxe_ds_StringMap();
+		this.menuItemShader = Luxe.renderer.shaders.bitmapfont.shader.clone();
+		this.menuItems.set("play",new luxe_Text({ font : this.titleFont, text : "Play!", shader : this.menuItemShader, depth : 2, align : 2, align_vertical : 2, point_size : 48, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y - 32), color : new phoenix_Color(1,1,1,1), sdf : true},{ fileName : "Menu.hx", lineNumber : 66, className : "Menu", methodName : "create_menu_items"}));
+		this.menuItems.set("credits",new luxe_Text({ font : this.titleFont, text : "Credits", shader : this.menuItemShader, depth : 2, align : 2, align_vertical : 2, point_size : 48, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y + 32), color : new phoenix_Color(1,1,1,1), sdf : true},{ fileName : "Menu.hx", lineNumber : 80, className : "Menu", methodName : "create_menu_items"}));
+	}
+	,destroy_menu_items: function() {
+		var $it0 = this.menuItems.iterator();
+		while( $it0.hasNext() ) {
+			var item = $it0.next();
+			item.destroy();
+		}
+	}
+	,select_item: function(item) {
+		var $it0 = this.menuItems.iterator();
+		while( $it0.hasNext() ) {
+			var other = $it0.next();
+			other.set_point_size(48);
+		}
+		if(item != "") this.menuItems.get(item).set_point_size(64);
+		this.currentSelection = item;
+	}
+	,onmousemove: function(e) {
+		var $it0 = this.menuItems.keys();
+		while( $it0.hasNext() ) {
+			var item = $it0.next();
+			if(this.menuItems.get(item).point_inside(e.pos) && this.currentSelection != item) this.select_item(item);
+		}
+	}
+	,onmouseup: function(e) {
+		if(this.currentSelection == "") return;
+		Main.fsm.set(this.currentSelection,null,null,{ fileName : "Menu.hx", lineNumber : 124, className : "Menu", methodName : "onmouseup"});
+	}
+	,__class__: Menu
+});
+var luxe_Component = function(_options) {
+	var _name = "";
+	if(_options != null) {
+		if(_options.name != null) _name = _options.name;
+	}
+	luxe_ID.call(this,_name == ""?Luxe.utils.uniqueid():_name);
+};
+luxe_Component.__name__ = ["luxe","Component"];
+luxe_Component.__super__ = luxe_ID;
+luxe_Component.prototype = $extend(luxe_ID.prototype,{
+	init: function() {
+	}
+	,update: function(dt) {
+	}
+	,onadded: function() {
+	}
+	,onremoved: function() {
+	}
+	,onfixedupdate: function(rate) {
+	}
+	,onreset: function() {
+	}
+	,ondestroy: function() {
+	}
+	,onkeyup: function(event) {
+	}
+	,onkeydown: function(event) {
+	}
+	,ontextinput: function(event) {
+	}
+	,oninputdown: function(event) {
+	}
+	,oninputup: function(event) {
+	}
+	,onmousedown: function(event) {
+	}
+	,onmouseup: function(event) {
+	}
+	,onmousemove: function(event) {
+	}
+	,onmousewheel: function(event) {
+	}
+	,ontouchdown: function(event) {
+	}
+	,ontouchup: function(event) {
+	}
+	,ontouchmove: function(event) {
+	}
+	,ongamepadup: function(event) {
+	}
+	,ongamepaddown: function(event) {
+	}
+	,ongamepadaxis: function(event) {
+	}
+	,ongamepaddevice: function(event) {
+	}
+	,onwindowmoved: function(event) {
+	}
+	,onwindowresized: function(event) {
+	}
+	,onwindowsized: function(event) {
+	}
+	,onwindowminimized: function(event) {
+	}
+	,onwindowrestored: function(event) {
+	}
+	,add: function(component) {
+		return this.get_entity().add(component);
+	}
+	,remove: function(_name) {
+		return this.get_entity().remove(_name);
+	}
+	,get: function(_name,in_children) {
+		if(in_children == null) in_children = false;
+		return this.get_entity().get(_name,in_children);
+	}
+	,get_any: function(_name,in_children,first_only) {
+		if(first_only == null) first_only = true;
+		if(in_children == null) in_children = false;
+		return this.get_entity().get_any(_name,in_children,first_only);
+	}
+	,has: function(_name) {
+		return this.get_entity().has(_name);
+	}
+	,_detach_entity: function() {
+		if(this.get_entity() != null) {
+		}
+	}
+	,_attach_entity: function() {
+		if(this.get_entity() != null) {
+		}
+	}
+	,set_entity: function(_entity) {
+		this._detach_entity();
+		this.entity = _entity;
+		this._attach_entity();
+		return this.get_entity();
+	}
+	,get_entity: function() {
+		return this.entity;
+	}
+	,set_pos: function(_p) {
+		return this.get_entity().get_transform().set_pos(_p);
+	}
+	,get_pos: function() {
+		return this.get_entity().get_transform().get_pos();
+	}
+	,set_rotation: function(_r) {
+		return this.get_entity().get_transform().set_rotation(_r);
+	}
+	,get_rotation: function() {
+		return this.get_entity().get_transform().get_rotation();
+	}
+	,set_scale: function(_s) {
+		return this.get_entity().get_transform().set_scale(_s);
+	}
+	,get_scale: function() {
+		return this.get_entity().get_transform().get_scale();
+	}
+	,set_origin: function(_o) {
+		return this.get_entity().get_transform().set_origin(_o);
+	}
+	,get_origin: function() {
+		return this.get_entity().get_transform().get_origin();
+	}
+	,set_transform: function(_o) {
+		return this.get_entity().set_transform(_o);
+	}
+	,get_transform: function() {
+		return this.get_entity().get_transform();
+	}
+	,entity_pos_change: function(_pos) {
+	}
+	,entity_scale_change: function(_scale) {
+	}
+	,entity_rotation_change: function(_rotation) {
+	}
+	,entity_origin_change: function(_origin) {
+	}
+	,entity_parent_change: function(_parent) {
+	}
+	,__class__: luxe_Component
+	,__properties__: {set_origin:"set_origin",get_origin:"get_origin",set_scale:"set_scale",get_scale:"get_scale",set_rotation:"set_rotation",get_rotation:"get_rotation",set_pos:"set_pos",get_pos:"get_pos",set_entity:"set_entity",get_entity:"get_entity"}
+});
+var Velocity = function(vx,vy) {
+	this.v = new phoenix_Vector();
+	luxe_Component.call(this,{ name : "velocity"});
+	this.v.set_x(vx);
+	this.v.set_y(vy);
+};
+Velocity.__name__ = ["Velocity"];
+Velocity.__super__ = luxe_Component;
+Velocity.prototype = $extend(luxe_Component.prototype,{
+	update: function(dt) {
+		var _g = this.get_pos();
+		_g.set_x(_g.x + this.v.x * dt);
+		var _g1 = this.get_pos();
+		_g1.set_y(_g1.y + this.v.y * dt);
+	}
+	,init: function() {
+		luxe_Component.prototype.init.call(this);
+	}
+	,ondestroy: function() {
+		luxe_Component.prototype.ondestroy.call(this);
+	}
+	,onremoved: function() {
+		luxe_Component.prototype.onremoved.call(this);
+	}
+	,__class__: Velocity
+});
+var BounceTopBottom = function() {
+	luxe_Component.call(this,{ name : "BounceTopBottom"});
+};
+BounceTopBottom.__name__ = ["BounceTopBottom"];
+BounceTopBottom.__super__ = luxe_Component;
+BounceTopBottom.prototype = $extend(luxe_Component.prototype,{
+	update: function(dt) {
+		if(this.get_pos().y <= 0 || this.get_pos().y + 15 >= Luxe.core.screen.h) {
+			var velocity = this.get("velocity");
+			velocity.v.y *= -1;
+		}
+	}
+	,init: function() {
+		luxe_Component.prototype.init.call(this);
+	}
+	,ondestroy: function() {
+		luxe_Component.prototype.ondestroy.call(this);
+	}
+	,onremoved: function() {
+		luxe_Component.prototype.onremoved.call(this);
+	}
+	,__class__: BounceTopBottom
+});
+var BindToPlayArea = function() {
+	luxe_Component.call(this,{ name : "bindToPlayArea"});
+};
+BindToPlayArea.__name__ = ["BindToPlayArea"];
+BindToPlayArea.__super__ = luxe_Component;
+BindToPlayArea.prototype = $extend(luxe_Component.prototype,{
+	update: function(dt) {
+		if(this.get_pos().y <= 0) this.get_pos().set_y(0); else if(this.get_pos().y + 60 >= Luxe.core.screen.h) this.get_pos().set_y(Luxe.core.screen.h - 60);
+	}
+	,init: function() {
+		luxe_Component.prototype.init.call(this);
+	}
+	,ondestroy: function() {
+		luxe_Component.prototype.ondestroy.call(this);
+	}
+	,onremoved: function() {
+		luxe_Component.prototype.onremoved.call(this);
+	}
+	,__class__: BindToPlayArea
+});
+var FollowEntityAI = function(target,speed) {
+	this.vel = null;
+	this.speed = 0;
+	luxe_Component.call(this,{ name : "FollowEntity"});
+	this.target = target;
+	this.speed = speed;
+};
+FollowEntityAI.__name__ = ["FollowEntityAI"];
+FollowEntityAI.__super__ = luxe_Component;
+FollowEntityAI.prototype = $extend(luxe_Component.prototype,{
+	update: function(dt) {
+		if(this.vel == null) this.vel = js_Boot.__cast(this.get("velocity") , Velocity);
+		var targetPos = this.target.get_pos().y - 30;
+		if(Math.abs(targetPos - this.get_pos().y) >= 20) this.vel.v.set_y(this.speed * (targetPos < this.get_pos().y + 30?-1:1)); else this.vel.v.set_y(0);
+	}
+	,init: function() {
+		luxe_Component.prototype.init.call(this);
+	}
+	,ondestroy: function() {
+		luxe_Component.prototype.ondestroy.call(this);
+	}
+	,onremoved: function() {
+		luxe_Component.prototype.onremoved.call(this);
+	}
+	,__class__: FollowEntityAI
+});
+var Score = function(play) {
+	luxe_Component.call(this,{ name : "score"});
+	this.play = play;
+};
+Score.__name__ = ["Score"];
+Score.__super__ = luxe_Component;
+Score.prototype = $extend(luxe_Component.prototype,{
+	update: function(dt) {
+		if(this.get_pos().x <= 0) {
+			var _g = this.play;
+			var _g1 = _g.p2Score;
+			_g.set_p2Score(_g1 + 1);
+			_g1;
+		} else if(this.get_pos().x >= Luxe.core.screen.w - 15) {
+			var _g2 = this.play;
+			var _g11 = _g2.p1Score;
+			_g2.set_p1Score(_g11 + 1);
+			_g11;
+		}
+	}
+	,init: function() {
+		luxe_Component.prototype.init.call(this);
+	}
+	,ondestroy: function() {
+		luxe_Component.prototype.ondestroy.call(this);
+	}
+	,onremoved: function() {
+		luxe_Component.prototype.onremoved.call(this);
+	}
+	,__class__: Score
+});
+var Play = function() {
+	this.beepReady = false;
+	this.p2Score = 0;
+	this.p1Score = 0;
+	luxe_State.call(this,{ name : "play"});
+};
+Play.__name__ = ["Play"];
+Play.__super__ = luxe_State;
+Play.prototype = $extend(luxe_State.prototype,{
+	set_p1Score: function(x) {
+		this.p1Score = x;
+		if(this.p1Score > 9) Main.fsm.set("menu",null,null,{ fileName : "Play.hx", lineNumber : 129, className : "Play", methodName : "set_p1Score"});
+		this.resetBall();
+		this.updateScoreDisplay();
+		return this.p1Score;
+	}
+	,set_p2Score: function(x) {
+		this.p2Score = x;
+		if(this.p2Score > 9) Main.fsm.set("menu",null,null,{ fileName : "Play.hx", lineNumber : 139, className : "Play", methodName : "set_p2Score"});
+		this.resetBall();
+		this.updateScoreDisplay();
+		return this.p2Score;
+	}
+	,resetBall: function() {
+		this.ball.set_pos(new phoenix_Vector(Luxe.core.screen.get_mid().x,Luxe.core.screen.get_mid().y));
+		var angle = (Math.random() - 0.5) * Math.PI / 2;
+		if(Math.random() < 0.5) angle += Math.PI;
+		var vel;
+		vel = js_Boot.__cast(this.ball._components.get("velocity",false) , Velocity);
+		var speed = 300;
+		vel.v = new phoenix_Vector(speed * Math.cos(angle),speed * Math.sin(angle));
+	}
+	,updateScoreDisplay: function() {
+		this.scoreText.set_text(this.p1Score + ":" + this.p2Score);
+	}
+	,onenter: function(_) {
+		var _g = this;
+		var beep = Luxe.resources.find_sound("beeep");
+		this.scoreFont = Luxe.resources.find_font("assets/fonts/digital7.fnt");
+		this.scoreText = new luxe_Text({ font : this.scoreFont, text : "0:0", depth : 10, align : 2, align_vertical : 2, point_size : 48, letter_spacing : 0, pos : new phoenix_Vector(Luxe.core.screen.get_mid().x,24), color : new phoenix_Color(1,1,1,1), sdf : true},{ fileName : "Play.hx", lineNumber : 171, className : "Play", methodName : "onenter"});
+		this.ball = new luxe_Visual({ pos : Luxe.core.screen.get_mid(), size : new phoenix_Vector(15,15), color : new phoenix_Color(1,1,1,1)},{ fileName : "Play.hx", lineNumber : 184, className : "Play", methodName : "onenter"});
+		this.ball.add(new Velocity(0,0));
+		this.ball.add(new BounceTopBottom());
+		this.ball.add(new Score(this));
+		this.ballCollider = new luxe_collision_shapes_Circle(this.ball.get_pos().x,this.ball.get_pos().y,7.5);
+		this.p1Paddle = new luxe_Visual({ pos : new phoenix_Vector(0,Luxe.core.screen.get_mid().y - 30), size : new phoenix_Vector(20,60), color : new phoenix_Color(1,1,1,1)},{ fileName : "Play.hx", lineNumber : 194, className : "Play", methodName : "onenter"});
+		this.p1Paddle.add(new Velocity(0,0));
+		this.p1Paddle.add(new BindToPlayArea());
+		this.p1Collider = luxe_collision_shapes_Polygon.rectangle(0,Luxe.core.screen.get_mid().y - 30,20,60,false);
+		this.p2Paddle = new luxe_Visual({ pos : new phoenix_Vector(Luxe.core.screen.w - 20,Luxe.core.screen.get_mid().y - 30), size : new phoenix_Vector(20,60), color : new phoenix_Color(1,1,1,1)},{ fileName : "Play.hx", lineNumber : 203, className : "Play", methodName : "onenter"});
+		this.p2Paddle.add(new Velocity(0,0));
+		this.p2Paddle.add(new BindToPlayArea());
+		this.p2Paddle.add(new FollowEntityAI(this.ball,200));
+		this.p2Collider = luxe_collision_shapes_Polygon.rectangle(Luxe.core.screen.w - 20,Luxe.core.screen.get_mid().y - 30,20,60,false);
+		this.set_p1Score(0);
+		this.set_p2Score(0);
+		Luxe.audio.on("beep","load",function(_1) {
+			_g.beepReady = true;
+		});
+	}
+	,onleave: function(_) {
+		this.scoreText.destroy();
+		this.ball.destroy();
+		this.p1Paddle.destroy();
+		this.p2Paddle.destroy();
+	}
+	,onmousemove: function(e) {
+		var targetPos = e.y - 30;
+		if(Math.abs(targetPos - this.p1Paddle.get_pos().y) >= 20) (js_Boot.__cast(this.p1Paddle._components.get("velocity",false) , Velocity)).v.set_y(200 * (targetPos < this.p1Paddle.get_pos().y + 30?-1:1)); else (js_Boot.__cast(this.p1Paddle._components.get("velocity",false) , Velocity)).v.set_y(0);
+	}
+	,onkeyup: function(e) {
+		if(e.keycode == snow_system_input_Keycodes.escape) Main.fsm.set("menu",null,null,{ fileName : "Play.hx", lineNumber : 240, className : "Play", methodName : "onkeyup"});
+	}
+	,update: function(dt) {
+		this.ballCollider.set_position(this.ball.get_pos());
+		this.p1Collider.set_position(this.p1Paddle.get_pos());
+		if(luxe_collision_Collision.test(this.ballCollider,this.p1Collider) != null) {
+			(js_Boot.__cast(this.ball._components.get("velocity",false) , Velocity)).v.set_x(Math.abs((js_Boot.__cast(this.ball._components.get("velocity",false) , Velocity)).v.x));
+			if(this.beepReady) Luxe.audio.play("beep");
+		}
+		if(luxe_collision_Collision.test(this.ballCollider,this.p2Collider) != null) {
+			(js_Boot.__cast(this.ball._components.get("velocity",false) , Velocity)).v.set_x(-Math.abs((js_Boot.__cast(this.ball._components.get("velocity",false) , Velocity)).v.x));
+			if(this.beepReady) Luxe.audio.play("beep");
+		}
+	}
+	,__class__: Play
+	,__properties__: {set_p2Score:"set_p2Score",set_p1Score:"set_p1Score"}
+});
 var Reflect = function() { };
 Reflect.__name__ = ["Reflect"];
 Reflect.field = function(o,field) {
@@ -2973,161 +3514,6 @@ luxe_Camera.prototype = $extend(luxe_Entity.prototype,{
 	}
 	,__class__: luxe_Camera
 	,__properties__: $extend(luxe_Entity.prototype.__properties__,{set_size_mode:"set_size_mode",get_size_mode:"get_size_mode",set_size:"set_size",get_size:"get_size",set_minimum_zoom:"set_minimum_zoom",get_minimum_zoom:"get_minimum_zoom",set_zoom:"set_zoom",get_zoom:"get_zoom",set_center:"set_center",get_center:"get_center",set_viewport:"set_viewport",get_viewport:"get_viewport"})
-});
-var luxe_ID = function(_name,_id) {
-	if(_id == null) _id = "";
-	if(_name == null) _name = "";
-	this.name = "";
-	this.name = _name;
-	if(_id == "") this.id = Luxe.utils.uniqueid(); else this.id = _id;
-};
-luxe_ID.__name__ = ["luxe","ID"];
-luxe_ID.prototype = {
-	__class__: luxe_ID
-};
-var luxe_Component = function(_options) {
-	var _name = "";
-	if(_options != null) {
-		if(_options.name != null) _name = _options.name;
-	}
-	luxe_ID.call(this,_name == ""?Luxe.utils.uniqueid():_name);
-};
-luxe_Component.__name__ = ["luxe","Component"];
-luxe_Component.__super__ = luxe_ID;
-luxe_Component.prototype = $extend(luxe_ID.prototype,{
-	init: function() {
-	}
-	,update: function(dt) {
-	}
-	,onadded: function() {
-	}
-	,onremoved: function() {
-	}
-	,onfixedupdate: function(rate) {
-	}
-	,onreset: function() {
-	}
-	,ondestroy: function() {
-	}
-	,onkeyup: function(event) {
-	}
-	,onkeydown: function(event) {
-	}
-	,ontextinput: function(event) {
-	}
-	,oninputdown: function(event) {
-	}
-	,oninputup: function(event) {
-	}
-	,onmousedown: function(event) {
-	}
-	,onmouseup: function(event) {
-	}
-	,onmousemove: function(event) {
-	}
-	,onmousewheel: function(event) {
-	}
-	,ontouchdown: function(event) {
-	}
-	,ontouchup: function(event) {
-	}
-	,ontouchmove: function(event) {
-	}
-	,ongamepadup: function(event) {
-	}
-	,ongamepaddown: function(event) {
-	}
-	,ongamepadaxis: function(event) {
-	}
-	,ongamepaddevice: function(event) {
-	}
-	,onwindowmoved: function(event) {
-	}
-	,onwindowresized: function(event) {
-	}
-	,onwindowsized: function(event) {
-	}
-	,onwindowminimized: function(event) {
-	}
-	,onwindowrestored: function(event) {
-	}
-	,add: function(component) {
-		return this.get_entity().add(component);
-	}
-	,remove: function(_name) {
-		return this.get_entity().remove(_name);
-	}
-	,get: function(_name,in_children) {
-		if(in_children == null) in_children = false;
-		return this.get_entity().get(_name,in_children);
-	}
-	,get_any: function(_name,in_children,first_only) {
-		if(first_only == null) first_only = true;
-		if(in_children == null) in_children = false;
-		return this.get_entity().get_any(_name,in_children,first_only);
-	}
-	,has: function(_name) {
-		return this.get_entity().has(_name);
-	}
-	,_detach_entity: function() {
-		if(this.get_entity() != null) {
-		}
-	}
-	,_attach_entity: function() {
-		if(this.get_entity() != null) {
-		}
-	}
-	,set_entity: function(_entity) {
-		this._detach_entity();
-		this.entity = _entity;
-		this._attach_entity();
-		return this.get_entity();
-	}
-	,get_entity: function() {
-		return this.entity;
-	}
-	,set_pos: function(_p) {
-		return this.get_entity().get_transform().set_pos(_p);
-	}
-	,get_pos: function() {
-		return this.get_entity().get_transform().get_pos();
-	}
-	,set_rotation: function(_r) {
-		return this.get_entity().get_transform().set_rotation(_r);
-	}
-	,get_rotation: function() {
-		return this.get_entity().get_transform().get_rotation();
-	}
-	,set_scale: function(_s) {
-		return this.get_entity().get_transform().set_scale(_s);
-	}
-	,get_scale: function() {
-		return this.get_entity().get_transform().get_scale();
-	}
-	,set_origin: function(_o) {
-		return this.get_entity().get_transform().set_origin(_o);
-	}
-	,get_origin: function() {
-		return this.get_entity().get_transform().get_origin();
-	}
-	,set_transform: function(_o) {
-		return this.get_entity().set_transform(_o);
-	}
-	,get_transform: function() {
-		return this.get_entity().get_transform();
-	}
-	,entity_pos_change: function(_pos) {
-	}
-	,entity_scale_change: function(_scale) {
-	}
-	,entity_rotation_change: function(_rotation) {
-	}
-	,entity_origin_change: function(_origin) {
-	}
-	,entity_parent_change: function(_parent) {
-	}
-	,__class__: luxe_Component
-	,__properties__: {set_origin:"set_origin",get_origin:"get_origin",set_scale:"set_scale",get_scale:"get_scale",set_rotation:"set_rotation",get_rotation:"get_rotation",set_pos:"set_pos",get_pos:"get_pos",set_entity:"set_entity",get_entity:"get_entity"}
 });
 var snow_App = function() {
 	this.next_render = 0;
@@ -6024,6 +6410,476 @@ luxe_Sprite.prototype = $extend(luxe_Visual.prototype,{
 	,__class__: luxe_Sprite
 	,__properties__: $extend(luxe_Visual.prototype.__properties__,{set_uv:"set_uv",set_flipy:"set_flipy",set_flipx:"set_flipx",set_centered:"set_centered"})
 });
+var luxe_States = function(_options) {
+	this._state_count = 0;
+	this.active_count = 0;
+	var _name = "";
+	if(_options != null && _options.name != null) _name = _options.name;
+	luxe_Objects.call(this,_name == ""?Luxe.utils.uniqueid():_name);
+	this._states = new haxe_ds_StringMap();
+	this.active_states = [];
+	Luxe.core.on(2,$bind(this,this.init));
+	Luxe.core.on(6,$bind(this,this.ondestroy));
+	Luxe.core.on(4,$bind(this,this.update));
+	Luxe.core.on(7,$bind(this,this.prerender));
+	Luxe.core.on(9,$bind(this,this.postrender));
+	Luxe.core.on(8,$bind(this,this.render));
+	Luxe.core.on(10,$bind(this,this.keydown));
+	Luxe.core.on(11,$bind(this,this.keyup));
+	Luxe.core.on(12,$bind(this,this.textinput));
+	Luxe.core.on(14,$bind(this,this.inputup));
+	Luxe.core.on(13,$bind(this,this.inputdown));
+	Luxe.core.on(16,$bind(this,this.mouseup));
+	Luxe.core.on(15,$bind(this,this.mousedown));
+	Luxe.core.on(17,$bind(this,this.mousemove));
+	Luxe.core.on(18,$bind(this,this.mousewheel));
+	Luxe.core.on(20,$bind(this,this.touchup));
+	Luxe.core.on(19,$bind(this,this.touchdown));
+	Luxe.core.on(21,$bind(this,this.touchmove));
+	Luxe.core.on(24,$bind(this,this.gamepadup));
+	Luxe.core.on(23,$bind(this,this.gamepaddown));
+	Luxe.core.on(22,$bind(this,this.gamepadaxis));
+	Luxe.core.on(25,$bind(this,this.gamepaddevice));
+	Luxe.core.on(27,$bind(this,this.windowmoved));
+	Luxe.core.on(28,$bind(this,this.windowresized));
+	Luxe.core.on(29,$bind(this,this.windowsized));
+	Luxe.core.on(30,$bind(this,this.windowminimized));
+	Luxe.core.on(31,$bind(this,this.windowrestored));
+};
+luxe_States.__name__ = ["luxe","States"];
+luxe_States.__super__ = luxe_Objects;
+luxe_States.prototype = $extend(luxe_Objects.prototype,{
+	add: function(_state) {
+		this._states.set(_state.name,_state);
+		this._state_count++;
+		_state.machine = this;
+		_state.onadded();
+		if(Luxe.core.inited) {
+			if(!_state.inited) {
+				_state.inited = true;
+				_state.init();
+			}
+		}
+		return _state;
+	}
+	,remove: function(_name,_leave_with) {
+		if(this._states.exists(_name)) {
+			var _state = this._states.get(_name);
+			if(_state != null) {
+				if(_state.active) {
+					this.leave(_state,_leave_with);
+					if(_state == this.current_state) this.current_state = null;
+				}
+				if(_state.enabled) this.disable(_state.name);
+				_state.onremoved();
+				this._states.remove(_name);
+				this._state_count--;
+			}
+			return _state;
+		}
+		return null;
+	}
+	,kill: function(_name) {
+		if(this._state_count > 0) {
+			if(this._states.exists(_name)) {
+				var _state = this.remove(_name);
+				if(_state != null) _state.ondestroy();
+			}
+		}
+	}
+	,enabled: function(_name) {
+		if(this._state_count == 0) return false;
+		var state = this._states.get(_name);
+		if(state != null) return state.enabled;
+		return false;
+	}
+	,enable: function(_name,_enable_with) {
+		if(this._state_count == 0) return;
+		var state = this._states.get(_name);
+		if(state != null) {
+			state.onenabled(_enable_with);
+			state.active = true;
+			state.enabled = true;
+			this.active_states.push(state);
+			this.active_count++;
+			null;
+		}
+	}
+	,disable: function(_name,_disable_with) {
+		if(this._state_count == 0) return;
+		var state = this._states.get(_name);
+		if(state != null) {
+			state.ondisabled(_disable_with);
+			state.active = false;
+			state.enabled = false;
+			HxOverrides.remove(this.active_states,state);
+			this.active_count--;
+			null;
+		}
+	}
+	,enter: function(_state,_enter_with) {
+		_state.onenter(_enter_with);
+		this.active_states.push(_state);
+		this.active_count++;
+		_state.active = true;
+	}
+	,leave: function(_state,_leave_with) {
+		_state.active = false;
+		HxOverrides.remove(this.active_states,_state);
+		this.active_count--;
+		_state.onleave(_leave_with);
+	}
+	,set: function(name,_enter_with,_leave_with,pos) {
+		if(this.current_state != null) {
+			this.leave(this.current_state,_leave_with);
+			this.current_state = null;
+		}
+		if(this._states.exists(name)) {
+			this.current_state = this._states.get(name);
+			this.enter(this.current_state,_enter_with);
+			null;
+		}
+	}
+	,destroy: function() {
+		if(this._state_count > 0) {
+			var $it0 = this._states.iterator();
+			while( $it0.hasNext() ) {
+				var state = $it0.next();
+				state.destroy();
+			}
+		}
+		Luxe.core.off(2,$bind(this,this.init));
+		Luxe.core.off(6,$bind(this,this.ondestroy));
+		Luxe.core.off(4,$bind(this,this.update));
+		Luxe.core.off(7,$bind(this,this.prerender));
+		Luxe.core.off(9,$bind(this,this.postrender));
+		Luxe.core.off(8,$bind(this,this.render));
+		Luxe.core.off(10,$bind(this,this.keydown));
+		Luxe.core.off(11,$bind(this,this.keyup));
+		Luxe.core.off(12,$bind(this,this.textinput));
+		Luxe.core.off(14,$bind(this,this.inputup));
+		Luxe.core.off(13,$bind(this,this.inputdown));
+		Luxe.core.off(16,$bind(this,this.mouseup));
+		Luxe.core.off(15,$bind(this,this.mousedown));
+		Luxe.core.off(17,$bind(this,this.mousemove));
+		Luxe.core.off(18,$bind(this,this.mousewheel));
+		Luxe.core.off(20,$bind(this,this.touchup));
+		Luxe.core.off(19,$bind(this,this.touchdown));
+		Luxe.core.off(21,$bind(this,this.touchmove));
+		Luxe.core.off(24,$bind(this,this.gamepadup));
+		Luxe.core.off(23,$bind(this,this.gamepaddown));
+		Luxe.core.off(22,$bind(this,this.gamepadaxis));
+		Luxe.core.off(25,$bind(this,this.gamepaddevice));
+		Luxe.core.off(27,$bind(this,this.windowmoved));
+		Luxe.core.off(28,$bind(this,this.windowresized));
+		Luxe.core.off(29,$bind(this,this.windowsized));
+		Luxe.core.off(30,$bind(this,this.windowminimized));
+		Luxe.core.off(31,$bind(this,this.windowrestored));
+		this.emit(6,null,{ fileName : "States.hx", lineNumber : 382, className : "luxe.States", methodName : "destroy"});
+	}
+	,init: function(_) {
+		if(this._state_count > 0) {
+			var $it0 = this._states.iterator();
+			while( $it0.hasNext() ) {
+				var state = $it0.next();
+				if(!state.inited) {
+					state.inited = true;
+					state.init();
+				}
+			}
+		}
+	}
+	,reset: function(_) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onreset();
+			}
+		}
+	}
+	,update: function(dt) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.update(dt);
+			}
+		}
+	}
+	,ondestroy: function(_) {
+		this.destroy();
+	}
+	,render: function(_) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onrender();
+			}
+		}
+	}
+	,prerender: function(_) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onprerender();
+			}
+		}
+	}
+	,postrender: function(_) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onpostrender();
+			}
+		}
+	}
+	,keydown: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onkeydown(e);
+			}
+		}
+	}
+	,keyup: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onkeyup(e);
+			}
+		}
+	}
+	,textinput: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ontextinput(e);
+			}
+		}
+	}
+	,inputup: function(_event) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.oninputup(_event.name,_event.event);
+			}
+		}
+	}
+	,inputdown: function(_event) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.oninputdown(_event.name,_event.event);
+			}
+		}
+	}
+	,mousedown: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onmousedown(e);
+			}
+		}
+	}
+	,mousewheel: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onmousewheel(e);
+			}
+		}
+	}
+	,mouseup: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onmouseup(e);
+			}
+		}
+	}
+	,mousemove: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onmousemove(e);
+			}
+		}
+	}
+	,touchdown: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ontouchdown(e);
+			}
+		}
+	}
+	,touchup: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ontouchup(e);
+			}
+		}
+	}
+	,touchmove: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ontouchmove(e);
+			}
+		}
+	}
+	,gamepadaxis: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ongamepadaxis(e);
+			}
+		}
+	}
+	,gamepadup: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ongamepadup(e);
+			}
+		}
+	}
+	,gamepaddown: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ongamepaddown(e);
+			}
+		}
+	}
+	,gamepaddevice: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.ongamepaddevice(e);
+			}
+		}
+	}
+	,windowmoved: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onwindowmoved(e);
+			}
+		}
+	}
+	,windowresized: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onwindowresized(e);
+			}
+		}
+	}
+	,windowsized: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onwindowsized(e);
+			}
+		}
+	}
+	,windowminimized: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onwindowminimized(e);
+			}
+		}
+	}
+	,windowrestored: function(e) {
+		if(this.active_count > 0) {
+			var _g = 0;
+			var _g1 = this.active_states;
+			while(_g < _g1.length) {
+				var state = _g1[_g];
+				++_g;
+				state.onwindowrestored(e);
+			}
+		}
+	}
+	,__class__: luxe_States
+});
 var luxe_Text = function(_options,_pos_info) {
 	this.text_options = _options;
 	this.text_bounds = new phoenix_Rectangle();
@@ -6266,6 +7122,595 @@ luxe_Timer.prototype = {
 	}
 	,__class__: luxe_Timer
 };
+var luxe_collision_Collision = function() {
+	throw new js__$Boot_HaxeError("Collision is a static class. No instances can be created.");
+};
+luxe_collision_Collision.__name__ = ["luxe","collision","Collision"];
+luxe_collision_Collision.test = function(shape1,shape2) {
+	if(shape1 == shape2) return null;
+	var result1;
+	var result2;
+	if(js_Boot.__instanceof(shape1,luxe_collision_shapes_Circle) && js_Boot.__instanceof(shape2,luxe_collision_shapes_Circle)) return luxe_collision_Collision.checkCircles(js_Boot.__cast(shape1 , luxe_collision_shapes_Circle),js_Boot.__cast(shape2 , luxe_collision_shapes_Circle));
+	if(js_Boot.__instanceof(shape1,luxe_collision_shapes_Polygon) && js_Boot.__instanceof(shape2,luxe_collision_shapes_Polygon)) {
+		result1 = luxe_collision_Collision.checkPolygons(js_Boot.__cast(shape1 , luxe_collision_shapes_Polygon),js_Boot.__cast(shape2 , luxe_collision_shapes_Polygon),false);
+		if(result1 == null) return null;
+		result2 = luxe_collision_Collision.checkPolygons(js_Boot.__cast(shape2 , luxe_collision_shapes_Polygon),js_Boot.__cast(shape1 , luxe_collision_shapes_Polygon),true);
+		if(result2 == null) return null;
+		if(Math.abs(result1.overlap) < Math.abs(result2.overlap)) return result1; else return result2;
+	}
+	if(js_Boot.__instanceof(shape1,luxe_collision_shapes_Circle)) return luxe_collision_Collision.checkCircleVsPolygon(js_Boot.__cast(shape1 , luxe_collision_shapes_Circle),js_Boot.__cast(shape2 , luxe_collision_shapes_Polygon),true);
+	if(js_Boot.__instanceof(shape1,luxe_collision_shapes_Polygon)) return luxe_collision_Collision.checkCircleVsPolygon(js_Boot.__cast(shape2 , luxe_collision_shapes_Circle),js_Boot.__cast(shape1 , luxe_collision_shapes_Polygon),false);
+	return null;
+};
+luxe_collision_Collision.testShapes = function(shape1,shapes) {
+	var results = [];
+	var _g = 0;
+	while(_g < shapes.length) {
+		var other_shape = shapes[_g];
+		++_g;
+		var result = luxe_collision_Collision.test(shape1,other_shape);
+		if(result != null) results.push(result);
+	}
+	return results;
+};
+luxe_collision_Collision.ray = function(lineStart,lineEnd,shapes) {
+	var _g = 0;
+	while(_g < shapes.length) {
+		var _shape = shapes[_g];
+		++_g;
+		if(js_Boot.__instanceof(_shape,luxe_collision_shapes_Circle)) {
+			if(luxe_collision_Collision.testCircleLine(_shape,lineStart,lineEnd)) return true;
+		} else {
+			var line = luxe_collision_Collision.bresenhamLine(lineStart,lineEnd);
+			var _g1 = 0;
+			while(_g1 < line.length) {
+				var _point = line[_g1];
+				++_g1;
+				if(luxe_collision_Collision.pointInPoly(_point,_shape)) return true;
+			}
+		}
+	}
+	return false;
+};
+luxe_collision_Collision.testCircleLine = function(circle,lineStart,lineEnd) {
+	var d = new phoenix_Vector(lineEnd.x,lineEnd.y,lineEnd.z,lineEnd.w).subtract(lineStart);
+	var f = new phoenix_Vector(lineStart.x,lineStart.y,lineStart.z,lineStart.w).subtract(circle.get_position());
+	var a = d.x * d.x + d.y * d.y + d.z * d.z;
+	var b = 2 * (f.x * d.x + f.y * d.y + f.z * d.z);
+	var c = f.x * f.x + f.y * f.y + f.z * f.z - circle.get_radius() * circle.get_radius();
+	var discrm = b * b - 4 * a * c;
+	if(discrm < 0) return false; else {
+		discrm = Math.sqrt(discrm);
+		var t1 = (-b + discrm) / (2 * a);
+		var t2 = (-b - discrm) / (2 * a);
+		if(t1 >= 0 && t1 <= 1) return true; else return false;
+	}
+	return false;
+};
+luxe_collision_Collision.pointInPoly = function(point,poly) {
+	var sides = poly.get_transformedVertices().length;
+	var i = 0;
+	var j = sides - 1;
+	var oddNodes = false;
+	var _g = 0;
+	while(_g < sides) {
+		var i1 = _g++;
+		if(poly.get_transformedVertices()[i1].y < point.y && poly.get_transformedVertices()[j].y >= point.y || poly.get_transformedVertices()[j].y < point.y && poly.get_transformedVertices()[i1].y >= point.y) {
+			if(poly.get_transformedVertices()[i1].x + (point.y - poly.get_transformedVertices()[i1].y) / (poly.get_transformedVertices()[j].y - poly.get_transformedVertices()[i1].y) * (poly.get_transformedVertices()[j].x - poly.get_transformedVertices()[i1].x) < point.x) oddNodes = !oddNodes;
+		}
+		j = i1;
+	}
+	return oddNodes;
+};
+luxe_collision_Collision.bresenhamLine = function(start,end) {
+	var points = [];
+	var steep = Math.abs(end.y - start.y) > Math.abs(end.x - start.x);
+	var swapped = false;
+	if(steep) {
+		start = luxe_collision_Collision.swap(start.x,start.y);
+		end = luxe_collision_Collision.swap(end.x,end.y);
+	}
+	if(start.x > end.x) {
+		var t = start.x;
+		start.set_x(end.x);
+		end.x = t;
+		if(end._construct) end.x; else {
+			if(end.listen_x != null && !end.ignore_listeners) end.listen_x(t);
+			end.x;
+		}
+		t = start.y;
+		start.set_y(end.y);
+		end.y = t;
+		if(end._construct) end.y; else {
+			if(end.listen_y != null && !end.ignore_listeners) end.listen_y(t);
+			end.y;
+		}
+		swapped = true;
+	}
+	var deltax = end.x - start.x;
+	var deltay = Math.abs(end.y - start.y);
+	var error = deltax / 2;
+	var ystep;
+	var y = start.y;
+	if(start.y < end.y) ystep = 1; else ystep = -1;
+	var x = start.x | 0;
+	var _g1 = start.x | 0;
+	var _g = end.x | 0;
+	while(_g1 < _g) {
+		var x1 = _g1++;
+		if(steep) points.push(new phoenix_Vector(y,x1)); else points.push(new phoenix_Vector(x1,y));
+		error -= deltay;
+		if(error < 0) {
+			y += ystep;
+			error += deltax;
+		}
+	}
+	if(swapped) points.reverse();
+	return points;
+};
+luxe_collision_Collision.checkCircleVsPolygon = function(circle,polygon,flip) {
+	var test1;
+	var test2;
+	var test;
+	var min1 = 0;
+	var max1 = 1073741823;
+	var min2 = 0;
+	var max2 = 1073741823;
+	var normalAxis = new phoenix_Vector();
+	var offset;
+	var vectorOffset = new phoenix_Vector();
+	var vectors;
+	var shortestDistance = 1073741823;
+	var collisionData = new luxe_collision_CollisionData();
+	var distMin;
+	var distance = -1;
+	var testDistance = 1073741823;
+	var closestVector = new phoenix_Vector();
+	vectorOffset = new phoenix_Vector(-circle.get_x(),-circle.get_y());
+	var _this = polygon.get_transformedVertices();
+	vectors = _this.slice();
+	if(vectors.length == 2) {
+		var temp = new phoenix_Vector(-(vectors[1].y - vectors[0].y),vectors[1].x - vectors[0].x);
+		temp.set_length(Math.min(0.0000000001,Math.sqrt(temp.x * temp.x + temp.y * temp.y + temp.z * temp.z)));
+		temp;
+		vectors.push(vectors[1].clone().add(temp));
+	}
+	var _g1 = 0;
+	var _g = vectors.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		distance = (circle.get_x() - vectors[i].x) * (circle.get_x() - vectors[i].x) + (circle.get_y() - vectors[i].y) * (circle.get_y() - vectors[i].y);
+		if(distance < testDistance) {
+			testDistance = distance;
+			closestVector.set_x(vectors[i].x);
+			closestVector.set_y(vectors[i].y);
+		}
+	}
+	normalAxis = new phoenix_Vector(closestVector.x - circle.get_x(),closestVector.y - circle.get_y());
+	normalAxis.divideScalar(Math.sqrt(normalAxis.x * normalAxis.x + normalAxis.y * normalAxis.y + normalAxis.z * normalAxis.z));
+	min1 = normalAxis.dot(vectors[0]);
+	max1 = min1;
+	var _g11 = 1;
+	var _g2 = vectors.length;
+	while(_g11 < _g2) {
+		var j = _g11++;
+		test = normalAxis.dot(vectors[j]);
+		if(test < min1) min1 = test;
+		if(test > max1) max1 = test;
+	}
+	max2 = circle.get_transformedRadius();
+	min2 -= circle.get_transformedRadius();
+	offset = normalAxis.x * vectorOffset.x + normalAxis.y * vectorOffset.y + normalAxis.z * vectorOffset.z;
+	min1 += offset;
+	max1 += offset;
+	test1 = min1 - max2;
+	test2 = min2 - max1;
+	if(test1 > 0 || test2 > 0) return null;
+	distMin = -(max2 - min1);
+	if(flip) distMin *= -1;
+	if(Math.abs(distMin) < shortestDistance) {
+		collisionData.unitVector = normalAxis;
+		collisionData.overlap = distMin;
+		shortestDistance = Math.abs(distMin);
+	}
+	var _g12 = 0;
+	var _g3 = vectors.length;
+	while(_g12 < _g3) {
+		var i1 = _g12++;
+		normalAxis = luxe_collision_Collision.findNormalAxis(vectors,i1);
+		min1 = normalAxis.dot(vectors[0]);
+		max1 = min1;
+		var _g31 = 1;
+		var _g21 = vectors.length;
+		while(_g31 < _g21) {
+			var j1 = _g31++;
+			test = normalAxis.dot(vectors[j1]);
+			if(test < min1) min1 = test;
+			if(test > max1) max1 = test;
+		}
+		max2 = circle.get_transformedRadius();
+		min2 = -circle.get_transformedRadius();
+		offset = normalAxis.x * vectorOffset.x + normalAxis.y * vectorOffset.y + normalAxis.z * vectorOffset.z;
+		min1 += offset;
+		max1 += offset;
+		test1 = min1 - max2;
+		test2 = min2 - max1;
+		if(test1 > 0 || test2 > 0) return null;
+		distMin = -(max2 - min1);
+		if(flip) distMin *= -1;
+		if(Math.abs(distMin) < shortestDistance) {
+			collisionData.unitVector = normalAxis;
+			collisionData.overlap = distMin;
+			shortestDistance = Math.abs(distMin);
+		}
+	}
+	if(flip) collisionData.shape2 = polygon; else collisionData.shape2 = circle;
+	if(flip) collisionData.shape1 = circle; else collisionData.shape1 = polygon;
+	collisionData.separation = new phoenix_Vector(-collisionData.unitVector.x * collisionData.overlap,-collisionData.unitVector.y * collisionData.overlap);
+	if(flip) collisionData.unitVector.invert();
+	return collisionData;
+};
+luxe_collision_Collision.checkCircles = function(circle1,circle2) {
+	var totalRadius = circle1.get_transformedRadius() + circle2.get_transformedRadius();
+	var distanceSquared = (circle1.get_x() - circle2.get_x()) * (circle1.get_x() - circle2.get_x()) + (circle1.get_y() - circle2.get_y()) * (circle1.get_y() - circle2.get_y());
+	if(distanceSquared < totalRadius * totalRadius) {
+		var difference = totalRadius - Math.sqrt(distanceSquared);
+		var collisionData = new luxe_collision_CollisionData();
+		collisionData.shape1 = circle1;
+		collisionData.shape2 = circle2;
+		collisionData.unitVector = new phoenix_Vector(circle1.get_x() - circle2.get_x(),circle1.get_y() - circle2.get_y());
+		collisionData.unitVector.normalize();
+		collisionData.separation = new phoenix_Vector(collisionData.unitVector.x * difference,collisionData.unitVector.y * difference);
+		collisionData.overlap = collisionData.separation.get_length();
+		return collisionData;
+	}
+	return null;
+};
+luxe_collision_Collision.checkPolygons = function(polygon1,polygon2,flip) {
+	var test1;
+	var test2;
+	var testNum;
+	var min1;
+	var max1;
+	var min2;
+	var max2;
+	var axis;
+	var offset;
+	var vectors1;
+	var vectors2;
+	var shortestDistance = 1073741823;
+	var collisionData = new luxe_collision_CollisionData();
+	var _this = polygon1.get_transformedVertices();
+	vectors1 = _this.slice();
+	var _this1 = polygon2.get_transformedVertices();
+	vectors2 = _this1.slice();
+	if(vectors1.length == 2) {
+		var temp = new phoenix_Vector(-(vectors1[1].y - vectors1[0].y),vectors1[1].x - vectors1[0].x);
+		temp.set_length(Math.min(0.0000000001,Math.sqrt(temp.x * temp.x + temp.y * temp.y + temp.z * temp.z)));
+		temp;
+		vectors1.push(vectors1[1].add(temp));
+	}
+	if(vectors2.length == 2) {
+		var temp1 = new phoenix_Vector(-(vectors2[1].y - vectors2[0].y),vectors2[1].x - vectors2[0].x);
+		temp1.set_length(Math.min(0.0000000001,Math.sqrt(temp1.x * temp1.x + temp1.y * temp1.y + temp1.z * temp1.z)));
+		temp1;
+		vectors2.push(vectors2[1].add(temp1));
+	}
+	var _g1 = 0;
+	var _g = vectors1.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		axis = luxe_collision_Collision.findNormalAxis(vectors1,i);
+		min1 = axis.dot(vectors1[0]);
+		max1 = min1;
+		var _g3 = 1;
+		var _g2 = vectors1.length;
+		while(_g3 < _g2) {
+			var j = _g3++;
+			testNum = axis.dot(vectors1[j]);
+			if(testNum < min1) min1 = testNum;
+			if(testNum > max1) max1 = testNum;
+		}
+		min2 = axis.dot(vectors2[0]);
+		max2 = min2;
+		var _g31 = 1;
+		var _g21 = vectors2.length;
+		while(_g31 < _g21) {
+			var j1 = _g31++;
+			testNum = axis.dot(vectors2[j1]);
+			if(testNum < min2) min2 = testNum;
+			if(testNum > max2) max2 = testNum;
+		}
+		test1 = min1 - max2;
+		test2 = min2 - max1;
+		if(test1 > 0 || test2 > 0) return null;
+		var distMin = -(max2 - min1);
+		if(flip) distMin *= -1;
+		if(Math.abs(distMin) < shortestDistance) {
+			collisionData.unitVector = axis;
+			collisionData.overlap = distMin;
+			shortestDistance = Math.abs(distMin);
+		}
+	}
+	if(flip) collisionData.shape1 = polygon2; else collisionData.shape1 = polygon1;
+	if(flip) collisionData.shape2 = polygon1; else collisionData.shape2 = polygon2;
+	collisionData.separation = new phoenix_Vector(-collisionData.unitVector.x * collisionData.overlap,-collisionData.unitVector.y * collisionData.overlap);
+	if(flip) collisionData.unitVector.invert();
+	return collisionData;
+};
+luxe_collision_Collision.findNormalAxis = function(vertices,index) {
+	var vector1 = vertices[index];
+	var vector2;
+	if(index >= vertices.length - 1) vector2 = vertices[0]; else vector2 = vertices[index + 1];
+	var normalAxis = new phoenix_Vector(-(vector2.y - vector1.y),vector2.x - vector1.x);
+	normalAxis.divideScalar(Math.sqrt(normalAxis.x * normalAxis.x + normalAxis.y * normalAxis.y + normalAxis.z * normalAxis.z));
+	return normalAxis;
+};
+luxe_collision_Collision.swap = function(a,b) {
+	var t = a;
+	a = b;
+	b = t;
+	return new phoenix_Vector(a,b);
+};
+luxe_collision_Collision.prototype = {
+	__class__: luxe_collision_Collision
+};
+var luxe_collision_CollisionData = function() {
+	this.overlap = 0;
+	this.separation = new phoenix_Vector();
+	this.unitVector = new phoenix_Vector();
+};
+luxe_collision_CollisionData.__name__ = ["luxe","collision","CollisionData"];
+luxe_collision_CollisionData.prototype = {
+	__class__: luxe_collision_CollisionData
+};
+var luxe_collision_ShapeDrawer = function() {
+};
+luxe_collision_ShapeDrawer.__name__ = ["luxe","collision","ShapeDrawer"];
+luxe_collision_ShapeDrawer.prototype = {
+	drawLine: function(p0,p1,color,immediate) {
+		if(immediate == null) immediate = false;
+	}
+	,drawShape: function(shape,color,immediate) {
+		if(immediate == null) immediate = false;
+		if(js_Boot.__instanceof(shape,luxe_collision_shapes_Polygon)) {
+			this.drawPolygon(js_Boot.__cast(shape , luxe_collision_shapes_Polygon),color,immediate);
+			return;
+		} else {
+			this.drawCircle(js_Boot.__cast(shape , luxe_collision_shapes_Circle),color,immediate);
+			return;
+		}
+	}
+	,drawPolygon: function(poly,color,immediate) {
+		if(immediate == null) immediate = false;
+		var v;
+		var _this = poly.get_transformedVertices();
+		v = _this.slice();
+		this.drawVertList(v,color,immediate);
+	}
+	,drawVector: function(v,start,color,immediate) {
+		if(immediate == null) immediate = false;
+		this.drawLine(start,v,color,immediate);
+	}
+	,drawCircle: function(circle,color,immediate) {
+		if(immediate == null) immediate = false;
+		var _smooth = 10;
+		var _steps = Std["int"](_smooth * Math.sqrt(circle.get_transformedRadius()));
+		var theta = 6.2831852 / _steps;
+		var tangential_factor = Math.tan(theta);
+		var radial_factor = Math.cos(theta);
+		var x = circle.get_transformedRadius();
+		var y = 0;
+		var _verts = [];
+		var _g = 0;
+		while(_g < _steps) {
+			var i = _g++;
+			var __x = x + circle.get_x();
+			var __y = y + circle.get_y();
+			_verts.push(new phoenix_Vector(__x,__y));
+			var tx = -y;
+			var ty = x;
+			x += tx * tangential_factor;
+			y += ty * tangential_factor;
+			x *= radial_factor;
+			y *= radial_factor;
+		}
+		this.drawVertList(_verts,color,immediate);
+	}
+	,drawVertList: function(_verts,color,immediate) {
+		if(immediate == null) immediate = false;
+		var _count = _verts.length;
+		if(_count < 3) throw new js__$Boot_HaxeError("cannot draw polygon with < 3 verts as this is a line or a point.");
+		var _g = 1;
+		while(_g < _count) {
+			var i = _g++;
+			this.drawLine(_verts[i],_verts[i - 1],color,immediate);
+		}
+		this.drawLine(_verts[_count - 1],_verts[0],color,immediate);
+	}
+	,__class__: luxe_collision_ShapeDrawer
+};
+var luxe_collision_shapes_Shape = function(_x,_y) {
+	this._transformed = false;
+	this._scaleY = 1;
+	this._scaleX = 1;
+	this._rotation_radians = 0;
+	this._rotation = 0;
+	this.name = "shape";
+	this.active = true;
+	this.tags = new haxe_ds_StringMap();
+	this._position = new phoenix_Vector(_x,_y);
+	this._scale = new phoenix_Vector(1,1);
+	this._rotation_quat = new phoenix_Quaternion();
+	this._rotation = 0;
+	this._scaleX = 1;
+	this._scaleY = 1;
+	this._transformMatrix = new phoenix_Matrix();
+	this._transformMatrix.makeTranslation(this._position.x,this._position.y,0);
+	this._transformedVertices = [];
+	this._vertices = [];
+};
+luxe_collision_shapes_Shape.__name__ = ["luxe","collision","shapes","Shape"];
+luxe_collision_shapes_Shape.prototype = {
+	destroy: function() {
+		this._position = null;
+		this._scale = null;
+		this._transformMatrix = null;
+		this._transformedVertices = null;
+		this._vertices = null;
+	}
+	,refresh_transform: function() {
+		this._rotation_quat.setFromEuler(new phoenix_Vector(0,0,this._rotation_radians));
+		this._transformMatrix.compose(this._position,this._rotation_quat,this._scale);
+		this._transformed = false;
+	}
+	,get_position: function() {
+		return this._position;
+	}
+	,set_position: function(v) {
+		this._position = v;
+		this.refresh_transform();
+		return this._position;
+	}
+	,get_x: function() {
+		return this._position.x;
+	}
+	,set_x: function(x) {
+		this._position.set_x(x);
+		this.refresh_transform();
+		return this._position.x;
+	}
+	,get_y: function() {
+		return this._position.y;
+	}
+	,set_y: function(y) {
+		this._position.set_y(y);
+		this.refresh_transform();
+		return this._position.y;
+	}
+	,get_rotation: function() {
+		return this._rotation;
+	}
+	,set_rotation: function(v) {
+		this._rotation_radians = v * (Math.PI / 180);
+		this.refresh_transform();
+		return this._rotation = v;
+	}
+	,get_scaleX: function() {
+		return this._scaleX;
+	}
+	,set_scaleX: function(scale) {
+		this._scaleX = scale;
+		this._scale.set_x(this._scaleX);
+		this.refresh_transform();
+		return this._scaleX;
+	}
+	,get_scaleY: function() {
+		return this._scaleY;
+	}
+	,set_scaleY: function(scale) {
+		this._scaleY = scale;
+		this._scale.set_y(this._scaleY);
+		this.refresh_transform();
+		return this._scaleY;
+	}
+	,get_transformedVertices: function() {
+		if(!this._transformed) {
+			this._transformedVertices = [];
+			this._transformed = true;
+			var _count = this._vertices.length;
+			var _g = 0;
+			while(_g < _count) {
+				var i = _g++;
+				this._transformedVertices.push(this._vertices[i].clone().transform(this._transformMatrix));
+			}
+		}
+		return this._transformedVertices;
+	}
+	,get_vertices: function() {
+		return this._vertices;
+	}
+	,__class__: luxe_collision_shapes_Shape
+	,__properties__: {get_vertices:"get_vertices",get_transformedVertices:"get_transformedVertices",set_scaleY:"set_scaleY",get_scaleY:"get_scaleY",set_scaleX:"set_scaleX",get_scaleX:"get_scaleX",set_rotation:"set_rotation",get_rotation:"get_rotation",set_y:"set_y",get_y:"get_y",set_x:"set_x",get_x:"get_x",set_position:"set_position",get_position:"get_position"}
+};
+var luxe_collision_shapes_Circle = function(x,y,radius) {
+	luxe_collision_shapes_Shape.call(this,x,y);
+	this._radius = radius;
+	this.name = "circle " + this._radius;
+};
+luxe_collision_shapes_Circle.__name__ = ["luxe","collision","shapes","Circle"];
+luxe_collision_shapes_Circle.__super__ = luxe_collision_shapes_Shape;
+luxe_collision_shapes_Circle.prototype = $extend(luxe_collision_shapes_Shape.prototype,{
+	get_radius: function() {
+		return this._radius;
+	}
+	,get_transformedRadius: function() {
+		return this._radius * this.get_scaleX();
+	}
+	,__class__: luxe_collision_shapes_Circle
+	,__properties__: $extend(luxe_collision_shapes_Shape.prototype.__properties__,{get_transformedRadius:"get_transformedRadius",get_radius:"get_radius"})
+});
+var luxe_collision_shapes_Polygon = function(x,y,vertices) {
+	luxe_collision_shapes_Shape.call(this,x,y);
+	this.name = vertices.length + "polygon";
+	this._vertices = vertices;
+};
+luxe_collision_shapes_Polygon.__name__ = ["luxe","collision","shapes","Polygon"];
+luxe_collision_shapes_Polygon.create = function(x,y,sides,radius) {
+	if(radius == null) radius = 100;
+	if(sides < 3) throw new js__$Boot_HaxeError("Polygon - Needs at least 3 sides");
+	var rotation = Math.PI * 2 / sides;
+	var angle;
+	var vector;
+	var vertices = [];
+	var _g = 0;
+	while(_g < sides) {
+		var i = _g++;
+		angle = i * rotation + (Math.PI - rotation) * 0.5;
+		vector = new phoenix_Vector();
+		vector.set_x(Math.cos(angle) * radius);
+		vector.set_y(Math.sin(angle) * radius);
+		vertices.push(vector);
+	}
+	return new luxe_collision_shapes_Polygon(x,y,vertices);
+};
+luxe_collision_shapes_Polygon.rectangle = function(x,y,width,height,centered) {
+	if(centered == null) centered = true;
+	var vertices = [];
+	if(centered) {
+		vertices.push(new phoenix_Vector(-width / 2,-height / 2));
+		vertices.push(new phoenix_Vector(width / 2,-height / 2));
+		vertices.push(new phoenix_Vector(width / 2,height / 2));
+		vertices.push(new phoenix_Vector(-width / 2,height / 2));
+	} else {
+		vertices.push(new phoenix_Vector(0,0));
+		vertices.push(new phoenix_Vector(width,0));
+		vertices.push(new phoenix_Vector(width,height));
+		vertices.push(new phoenix_Vector(0,height));
+	}
+	return new luxe_collision_shapes_Polygon(x,y,vertices);
+};
+luxe_collision_shapes_Polygon.square = function(x,y,width,centered) {
+	if(centered == null) centered = true;
+	return luxe_collision_shapes_Polygon.rectangle(x,y,width,width,centered);
+};
+luxe_collision_shapes_Polygon.triangle = function(x,y,radius) {
+	return luxe_collision_shapes_Polygon.create(x,y,3,radius);
+};
+luxe_collision_shapes_Polygon.__super__ = luxe_collision_shapes_Shape;
+luxe_collision_shapes_Polygon.prototype = $extend(luxe_collision_shapes_Shape.prototype,{
+	destroy: function() {
+		var _count = this._vertices.length;
+		var _g = 0;
+		while(_g < _count) {
+			var i = _g++;
+			this._vertices[i] = null;
+		}
+		this._vertices = null;
+		luxe_collision_shapes_Shape.prototype.destroy.call(this);
+	}
+	,__class__: luxe_collision_shapes_Polygon
+});
 var luxe_components_Components = function(_entity) {
 	var _map = new haxe_ds_StringMap();
 	this.components = new luxe_structural_OrderedMap(_map);

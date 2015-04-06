@@ -1,4 +1,13 @@
 {
+  flow : {
+    build : {
+      android : {
+        sdk : 'C:/Users/Kenton/AppData/Local/Android/sdk',
+        ant_path : 'C:/apache-ant-1.9.4/bin'
+      }
+    }
+  },
+
   project : {
     name : 'LuxePong',
     version : '0.0.1',

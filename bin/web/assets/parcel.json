@@ -2,8 +2,10 @@
     "textures" : [
     ],
     "fonts" : [        
-        { "id" : "assets/font/montez/montez.fnt" }
+        { "id" : "assets/fonts/minecraftia.fnt" },
+        { "id" : "assets/fonts/digital7.fnt" }
     ],
     "sounds" : [
+        { "id" : "assets/sounds/ping_pong_8bit_beeep.ogg", "name" : "beep", "is_stream" : false}
     ]
 }
