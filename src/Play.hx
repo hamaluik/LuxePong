@@ -32,7 +32,8 @@ class Ball extends GameEntity {
 	            pos: Luxe.screen.mid,
 	            size: new Vector(15,15), 
 	            depth:2,
-	            texture: Luxe.resources.texture('assets/textures/ball.png')
+	            texture: Luxe.resources.texture('assets/textures/ball.png'),
+	            centered:true
 	        });
 		collider = new Circle(pos.x, pos.y, 7.5);
 	}
@@ -62,18 +63,39 @@ class Ball extends GameEntity {
 }
 
 class Paddle extends GameEntity {
-	public function new(startPos:Vector) {
+
+	private var targetY:Float = 0;
+	private var speed:Float = 200;
+
+	public function new(startPos:Vector, speed:Float) {
 		super({
 			pos: startPos,
 			size: new Vector(20, 60),
-			color: new Color(1, 1, 1, 1)
+			color: new Color(1, 1, 1, 1),
+			centered: false
 		});
+		
+		this.speed = speed;
+
+		targetY = Luxe.screen.h / 2 - 30;
+
 		collider = Polygon.rectangle(startPos.x, startPos.y, 20, 60, false);
+	}
+
+	public function setTargetY(y:Float) {
+		targetY = y;
 	}
 
 	override function update(dt:Float) {
 		pos.x += v.x * dt;
 		pos.y += v.y * dt;
+
+		if(Math.abs(targetY - pos.y) >= 5) { // 20
+			v.y = speed * (targetY < pos.y ? -1 : 1); // 30
+		}
+		else {
+			v.y = 0;
+		}
 
 		if(pos.y <= 0) {
 			pos.y = 0;
@@ -88,19 +110,9 @@ class Paddle extends GameEntity {
 }
 
 class CPUPaddle extends Paddle {
-	private var speed:Float = 200;
-
 	override function update(dt:Float) {
+		setTargetY(Play.instance.ball.pos.y - 30);
 		super.update(dt);
-
-		var targetPos:Float = Play.instance.ball.pos.y - 30;
-
-		if(Math.abs(targetPos - pos.y) >= 20) {
-			v.y = speed * (targetPos < pos.y + 30 ? -1 : 1);
-		}
-		else {
-			v.y = 0;
-		}
 	}
 }
 
@@ -178,27 +190,8 @@ class Play extends State {
 
 		ball = new Ball();
 
-		p1Paddle = new Paddle(new Vector(0, Luxe.screen.mid.y - 30));
-		p2Paddle = new CPUPaddle(new Vector(Luxe.screen.w - 20, Luxe.screen.mid.y - 30));
-		// p1Paddle = new Visual({ 
-		// 	pos: new Vector(0, Luxe.screen.mid.y - 30),
-		// 	size: new Vector(20, 60),
-		// 	color: new Color(1, 1, 1, 1)
-		// });
-		// p1Paddle.add(new Velocity(0, 0));
-		// p1Paddle.add(new BindToPlayArea());
-		// // p1Paddle.add(new FollowEntityAI(ball, 200));
-		// p1Collider = Polygon.rectangle(0, Luxe.screen.mid.y - 30, 20, 60, false);
-
-		// p2Paddle = new Visual({
-		// 	pos: new Vector(Luxe.screen.w - 20, Luxe.screen.mid.y - 30),
-		// 	size: new Vector(20, 60),
-		// 	color: new Color(1, 1, 1, 1)
-		// });
-		// p2Paddle.add(new Velocity(0, 0));
-		// p2Paddle.add(new BindToPlayArea());
-		// p2Paddle.add(new FollowEntityAI(ball, 200));
-		// p2Collider = Polygon.rectangle(Luxe.screen.w - 20, Luxe.screen.mid.y - 30, 20, 60, false);
+		p1Paddle = new Paddle(new Vector(0, Luxe.screen.mid.y - 30), 200);
+		p2Paddle = new CPUPaddle(new Vector(Luxe.screen.w - 20, Luxe.screen.mid.y - 30), 125);
 
 		p1Score = 0;
 		p2Score = 0;
@@ -212,16 +205,7 @@ class Play extends State {
 	}
 
 	override function onmousemove(e:MouseEvent) {
-		var targetPos:Float = e.y - 30;
-
-		// var vel:Vector = p1Paddle.v;
-		if(Math.abs(targetPos - p1Paddle.pos.y) >= 20) {
-			p1Paddle.v.y = 200 * (targetPos < p1Paddle.pos.y + 30 ? -1 : 1);
-		}
-		else {
-			p1Paddle.v.y = 0;
-		}
-
+		p1Paddle.setTargetY(e.y - 30);
 	} // onmousemove
 
 	override function onkeyup( e:KeyEvent ) {
