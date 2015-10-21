@@ -1,5 +1,6 @@
 {
     "textures" : [
+    	{ "id" : "assets/textures/ball.png" }
     ],
     "fonts" : [        
         { "id" : "assets/fonts/minecraftia.fnt" },
