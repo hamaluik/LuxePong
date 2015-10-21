@@ -27,42 +27,51 @@ class GameEntity extends Sprite {
 
 class Ball extends GameEntity {
 
+	public static var BALL_RADIUS:Float = 7.5;
+
 	public function new()  {
 		super({
 	            pos: Luxe.screen.mid,
-	            size: new Vector(15,15), 
+	            size: new Vector(BALL_RADIUS * 2, BALL_RADIUS * 2), 
 	            depth:2,
 	            texture: Luxe.resources.texture('assets/textures/ball.png'),
 	            centered:true
 	        });
-		collider = new Circle(pos.x, pos.y, 7.5);
+		collider = new Circle(pos.x, pos.y, BALL_RADIUS);
 	}
 
 	override function update(dt:Float) {
 		pos.x += v.x * dt;
 		pos.y += v.y * dt;
 
-		if(pos.y <= 0 || pos.y + 15 >= Luxe.screen.h) {
+		// Bounce off the top and bottom of the screen
+
+		if(pos.y - BALL_RADIUS <= 0 || pos.y + BALL_RADIUS >= Luxe.screen.h) {
 			v.y *= -1;
 		}
 
-		if(pos.x <= 0) {
+		// Score if hitting the edge of the screen
+
+		if(pos.x <= -BALL_RADIUS) {
 			Play.instance.p2Score++;
 		}
-		else if(pos.x >= Luxe.screen.w - 15) {
+		else if(pos.x >= Luxe.screen.w + BALL_RADIUS) {
 			Play.instance.p1Score++;
 		}
 
 		collider.position = pos;
 
-		transform.dirty = true;
-		// or update geometry.transform
+		// Advice from chat:
+		// "or update geometry.transform"
+		// "My sage advice is to make a hard and fast rule to always use entity.transform"
 
-		// My sage advice is to make a hard and fast rule to always use entity.transform
+		transform.dirty = true;
 	}
 }
 
 class Paddle extends GameEntity {
+	public static var PADDLE_WIDTH:Float = 20;
+	public static var PADDLE_HEIGHT:Float = 60;
 
 	private var targetY:Float = 0;
 	private var speed:Float = 200;
@@ -70,16 +79,16 @@ class Paddle extends GameEntity {
 	public function new(startPos:Vector, speed:Float) {
 		super({
 			pos: startPos,
-			size: new Vector(20, 60),
+			size: new Vector(PADDLE_WIDTH, PADDLE_HEIGHT),
 			color: new Color(1, 1, 1, 1),
 			centered: false
 		});
 		
 		this.speed = speed;
 
-		targetY = Luxe.screen.h / 2 - 30;
+		targetY = Luxe.screen.h / 2 - PADDLE_HEIGHT / 2;
 
-		collider = Polygon.rectangle(startPos.x, startPos.y, 20, 60, false);
+		collider = Polygon.rectangle(startPos.x, startPos.y, PADDLE_WIDTH, PADDLE_HEIGHT, false);
 	}
 
 	public function setTargetY(y:Float) {
@@ -90,8 +99,8 @@ class Paddle extends GameEntity {
 		pos.x += v.x * dt;
 		pos.y += v.y * dt;
 
-		if(Math.abs(targetY - pos.y) >= 5) { // 20
-			v.y = speed * (targetY < pos.y ? -1 : 1); // 30
+		if(Math.abs(targetY - pos.y) >= 5) {
+			v.y = speed * (targetY < pos.y ? -1 : 1);
 		}
 		else {
 			v.y = 0;
@@ -100,8 +109,8 @@ class Paddle extends GameEntity {
 		if(pos.y <= 0) {
 			pos.y = 0;
 		}
-		else if(pos.y + 60 >= Luxe.screen.h) {
-			pos.y = Luxe.screen.h - 60;
+		else if(pos.y + PADDLE_HEIGHT >= Luxe.screen.h) {
+			pos.y = Luxe.screen.h - PADDLE_HEIGHT;
 		}
 
 		collider.position = pos;
@@ -111,7 +120,7 @@ class Paddle extends GameEntity {
 
 class CPUPaddle extends Paddle {
 	override function update(dt:Float) {
-		setTargetY(Play.instance.ball.pos.y - 30);
+		setTargetY(Play.instance.ball.pos.y - Paddle.PADDLE_HEIGHT / 2);
 		super.update(dt);
 	}
 }
@@ -190,8 +199,8 @@ class Play extends State {
 
 		ball = new Ball();
 
-		p1Paddle = new Paddle(new Vector(0, Luxe.screen.mid.y - 30), 200);
-		p2Paddle = new CPUPaddle(new Vector(Luxe.screen.w - 20, Luxe.screen.mid.y - 30), 125);
+		p1Paddle = new Paddle(new Vector(0, Luxe.screen.mid.y - Paddle.PADDLE_HEIGHT / 2), 200);
+		p2Paddle = new CPUPaddle(new Vector(Luxe.screen.w - Paddle.PADDLE_WIDTH, Luxe.screen.mid.y - Paddle.PADDLE_HEIGHT / 2), 125);
 
 		p1Score = 0;
 		p2Score = 0;
@@ -205,7 +214,7 @@ class Play extends State {
 	}
 
 	override function onmousemove(e:MouseEvent) {
-		p1Paddle.setTargetY(e.y - 30);
+		p1Paddle.setTargetY(e.y - Paddle.PADDLE_HEIGHT / 2);
 	} // onmousemove
 
 	override function onkeyup( e:KeyEvent ) {
