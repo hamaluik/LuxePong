@@ -99,12 +99,16 @@ class Paddle extends GameEntity {
 		pos.x += v.x * dt;
 		pos.y += v.y * dt;
 
+		// Move the paddle toward the target position
+
 		if(Math.abs(targetY - pos.y) >= 5) {
 			v.y = speed * (targetY < pos.y ? -1 : 1);
 		}
 		else {
 			v.y = 0;
 		}
+
+		// Keep the paddle on the screen
 
 		if(pos.y <= 0) {
 			pos.y = 0;
