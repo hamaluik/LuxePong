@@ -20,46 +20,137 @@ import phoenix.geometry.CircleGeometry;
 import phoenix.Texture;
 import luxe.collision.shapes.Shape;
 
-class GameEntity extends Sprite {
-	public var v:Vector = new Vector();
-	public var collider:Shape;
+class Constants {
+	public static var PADDLE_WIDTH:Float = 20;
+ 	public static var PADDLE_HEIGHT:Float = 60;
+ 	public static var BALL_RADIUS:Float = 7.5;
 }
 
-class Ball extends GameEntity {
+class BaseComponent extends Component {
+	public function getVelocityComponent() {
+		return cast(get('Velocity'), Velocity);
+	}
+}
 
-	public static var BALL_RADIUS:Float = 7.5;
+class Velocity extends BaseComponent {
+	public var v:Vector;
 
-	public function new()  {
-		super({
-	            pos: Luxe.screen.mid,
-	            size: new Vector(BALL_RADIUS * 2, BALL_RADIUS * 2), 
-	            depth:2,
-	            texture: Luxe.resources.texture('assets/textures/ball.png'),
-	            centered:true
-	        });
-		collider = new Circle(pos.x, pos.y, BALL_RADIUS);
+	public function new(initialVelocity:Vector) {
+		super({name: 'Velocity'});
+
+		if(initialVelocity == null) {
+			initialVelocity = new Vector(0,0);
+		}
+
+		v = initialVelocity;
 	}
 
 	override function update(dt:Float) {
 		pos.x += v.x * dt;
 		pos.y += v.y * dt;
+	}
+}
+
+class BounceTop extends BaseComponent {
+	private var velocity:Velocity;
+
+	override function update(dt:Float) {
+		if(velocity == null) {
+			velocity = getVelocityComponent();
+		}
 
 		// Bounce off the top and bottom of the screen
 
-		if(pos.y - BALL_RADIUS <= 0 || pos.y + BALL_RADIUS >= Luxe.screen.h) {
-			v.y *= -1;
+		if(pos.y - Constants.BALL_RADIUS <= 0 || pos.y + Constants.BALL_RADIUS >= Luxe.screen.h) {
+			velocity.v.y *= -1;
 		}
+	}
+}
 
+class BallScore extends BaseComponent {
+	override function update(dt:Float) {
 		// Score if hitting the edge of the screen
-
-		if(pos.x <= -BALL_RADIUS) {
+		if(pos.x <= -Constants.BALL_RADIUS) {
 			Play.instance.p2Score++;
 		}
-		else if(pos.x >= Luxe.screen.w + BALL_RADIUS) {
+		else if(pos.x >= Luxe.screen.w + Constants.BALL_RADIUS) {
 			Play.instance.p1Score++;
 		}
+	}
+}
 
-		collider.position = pos;
+class PaddleMover extends BaseComponent {
+	private var targetY:Float = 0;
+	private var speed:Float = 200;
+
+	private var velocity:Velocity;
+
+	public function new(speed:Float) {
+		super({name: 'PaddleMover'});
+		this.speed = speed;
+	}
+
+	override function update(dt:Float) {
+		if(velocity == null) {
+			velocity = getVelocityComponent();
+		}
+
+		if(Math.abs(targetY - pos.y) >= 5) {
+			velocity.v.y = speed * (targetY < pos.y ? -1 : 1);
+		}
+		else {
+			velocity.v.y = 0;
+		}
+	}
+
+	public function setTargetY(y:Float) {
+		targetY = y;
+	}
+}
+
+class PaddleFollowsBall extends Component {
+	private var paddleMover:PaddleMover;
+
+	public function new() {
+		super({name: 'PaddleFollowsBall'});
+	}
+
+	override function update(dt:Float) {
+		if(paddleMover == null) {
+			paddleMover = cast(get("PaddleMover"), PaddleMover);
+		}
+
+		paddleMover.setTargetY(Play.instance.ball.pos.y - Constants.PADDLE_HEIGHT / 2);
+	}
+}
+
+class BoundToScreen extends Component {
+	override function update(dt:Float) {
+		if(pos.y <= 0) {
+			pos.y = 0;
+		}
+		else if(pos.y + Constants.PADDLE_HEIGHT >= Luxe.screen.h) {
+			pos.y = Luxe.screen.h - Constants.PADDLE_HEIGHT;
+		}
+	}
+}
+
+class GameEntity extends Sprite {
+	public var velocity:Velocity;
+	public var collider:Shape;
+
+	public function setCollider(collider:Shape) {
+		this.collider = collider;
+	}
+	
+	public function addVelocityComponent(velocityComponent:Velocity) {
+		this.velocity = velocityComponent;
+		add(velocityComponent);
+	}
+
+	override function update(dt:Float) {
+		if(collider != null)
+			collider.position = pos;
 
 		// Advice from chat:
 		// "or update geometry.transform"
@@ -69,74 +160,17 @@ class Ball extends GameEntity {
 	}
 }
 
-class Paddle extends GameEntity {
-	public static var PADDLE_WIDTH:Float = 20;
-	public static var PADDLE_HEIGHT:Float = 60;
-
-	private var targetY:Float = 0;
-	private var speed:Float = 200;
-
-	public function new(startPos:Vector, speed:Float) {
-		super({
-			pos: startPos,
-			size: new Vector(PADDLE_WIDTH, PADDLE_HEIGHT),
-			color: new Color(1, 1, 1, 1),
-			centered: false
-		});
-		
-		this.speed = speed;
-
-		targetY = Luxe.screen.h / 2 - PADDLE_HEIGHT / 2;
-
-		collider = Polygon.rectangle(startPos.x, startPos.y, PADDLE_WIDTH, PADDLE_HEIGHT, false);
-	}
-
-	public function setTargetY(y:Float) {
-		targetY = y;
-	}
-
-	override function update(dt:Float) {
-		pos.x += v.x * dt;
-		pos.y += v.y * dt;
-
-		// Move the paddle toward the target position
-
-		if(Math.abs(targetY - pos.y) >= 5) {
-			v.y = speed * (targetY < pos.y ? -1 : 1);
-		}
-		else {
-			v.y = 0;
-		}
-
-		// Keep the paddle on the screen
-
-		if(pos.y <= 0) {
-			pos.y = 0;
-		}
-		else if(pos.y + PADDLE_HEIGHT >= Luxe.screen.h) {
-			pos.y = Luxe.screen.h - PADDLE_HEIGHT;
-		}
-
-		collider.position = pos;
-		transform.dirty = true;
-	}
-}
-
-class CPUPaddle extends Paddle {
-	override function update(dt:Float) {
-		setTargetY(Play.instance.ball.pos.y - Paddle.PADDLE_HEIGHT / 2);
-		super.update(dt);
-	}
-}
-
 class Play extends State {
+
 	var scoreText:Text;
 	
 	var scoreFont:BitmapFont;
 
-	var p1Paddle:Paddle;
-	var p2Paddle:Paddle;
-	public var ball:Ball;
+	var p1Paddle:GameEntity;
+	var p2Paddle:GameEntity;
+	var playerPaddleMover:PaddleMover;
+
+	public var ball:GameEntity;
 
 	public static var instance:Play = null;
 
@@ -173,7 +207,7 @@ class Play extends State {
 		}
 
 		var speed:Float = 300;
-		ball.v = new Vector(speed * Math.cos(angle), speed * Math.sin(angle));
+		ball.velocity.v = new Vector(speed * Math.cos(angle), speed * Math.sin(angle));
 	}
 
 	function updateScoreDisplay() {
@@ -201,10 +235,44 @@ class Play extends State {
 			sdf: true
 		});
 
-		ball = new Ball();
+		ball = new GameEntity({
+	            pos: Luxe.screen.mid,
+	            size: new Vector(Constants.BALL_RADIUS * 2, Constants.BALL_RADIUS * 2), 
+	            depth:2,
+	            texture: Luxe.resources.texture('assets/textures/ball.png'),
+	            centered:true
+	        });
+		
+		ball.addVelocityComponent(new Velocity(new Vector(0,0)));
+		ball.add(new BallScore());
+		ball.add(new BounceTop());
+		ball.setCollider(new Circle(ball.pos.x, ball.pos.y, Constants.BALL_RADIUS));
 
-		p1Paddle = new Paddle(new Vector(0, Luxe.screen.mid.y - Paddle.PADDLE_HEIGHT / 2), 200);
-		p2Paddle = new CPUPaddle(new Vector(Luxe.screen.w - Paddle.PADDLE_WIDTH, Luxe.screen.mid.y - Paddle.PADDLE_HEIGHT / 2), 125);
+		p1Paddle = new GameEntity({
+			pos: new Vector(0, Luxe.screen.mid.y - Constants.PADDLE_HEIGHT / 2),
+			size: new Vector(Constants.PADDLE_WIDTH, Constants.PADDLE_HEIGHT),
+			color: new Color(1, 1, 1, 1),
+			centered: false
+		});
+
+		var v:Velocity = new Velocity(new Vector(0,0));
+		p1Paddle.addVelocityComponent(v);
+		playerPaddleMover = new PaddleMover(200);
+		p1Paddle.add(playerPaddleMover);
+		p1Paddle.setCollider(Polygon.rectangle(p1Paddle.pos.x, p1Paddle.pos.y, Constants.PADDLE_WIDTH, Constants.PADDLE_HEIGHT, false));
+
+		p2Paddle = new GameEntity({
+			pos: new Vector(Luxe.screen.w - Constants.PADDLE_WIDTH, Luxe.screen.mid.y - Constants.PADDLE_HEIGHT / 2),
+			size: new Vector(Constants.PADDLE_WIDTH, Constants.PADDLE_HEIGHT),
+			color: new Color(1, 1, 1, 1),
+			centered: false
+		});
+
+		var v:Velocity = new Velocity(new Vector(0,0));
+		p2Paddle.addVelocityComponent(v);
+		p2Paddle.add(new PaddleMover(125));
+		p2Paddle.add(new PaddleFollowsBall());
+		p2Paddle.setCollider(Polygon.rectangle(p2Paddle.pos.x, p2Paddle.pos.y, Constants.PADDLE_WIDTH, Constants.PADDLE_HEIGHT, false));
 
 		p1Score = 0;
 		p2Score = 0;
@@ -218,7 +286,7 @@ class Play extends State {
 	}
 
 	override function onmousemove(e:MouseEvent) {
-		p1Paddle.setTargetY(e.y - Paddle.PADDLE_HEIGHT / 2);
+		playerPaddleMover.setTargetY(e.y - Constants.PADDLE_HEIGHT / 2);
 	} // onmousemove
 
 	override function onkeyup( e:KeyEvent ) {
@@ -230,12 +298,12 @@ class Play extends State {
 	override function update(dt:Float) {
 
 		if(Collision.shapeWithShape(ball.collider, p1Paddle.collider) != null) {
-			ball.v.x = Math.abs(ball.v.x);
+			ball.velocity.v.x = Math.abs(ball.velocity.v.x);
 			Luxe.audio.play("beep");
 		}
 
 		if(Collision.shapeWithShape(ball.collider, p2Paddle.collider) != null) {
-			ball.v.x = -Math.abs(ball.v.x);
+			ball.velocity.v.x = -Math.abs(ball.velocity.v.x);
 			Luxe.audio.play("beep");
 		}
 	}
