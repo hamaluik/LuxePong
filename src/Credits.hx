@@ -32,8 +32,8 @@ class Credits extends State {
 
 	function create_title() {
 		// grab the custom font
-		titleShader = Luxe.renderer.shaders.bitmapfont.shader.clone();
-		titleFont = Luxe.resources.find_font('assets/fonts/digital7.fnt');
+		titleShader = Luxe.renderer.shaders.bitmapfont.shader.clone('credits-title-shader');
+		titleFont = Luxe.resources.font('assets/fonts/digital7.fnt');
 
 		// create the title text
 		titleText = new Text({

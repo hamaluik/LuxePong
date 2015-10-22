@@ -36,8 +36,8 @@ class Menu extends State {
 
 	function create_title() {
 		// grab the custom font
-		titleShader = Luxe.renderer.shaders.bitmapfont.shader.clone();
-		titleFont = Luxe.resources.find_font('assets/fonts/digital7.fnt');
+		titleShader = Luxe.renderer.shaders.bitmapfont.shader.clone('menu-title-shader');
+		titleFont = Luxe.resources.font('assets/fonts/digital7.fnt');
 
 		// create the title text
 		titleText = new Text({
@@ -61,7 +61,7 @@ class Menu extends State {
 	function create_menu_items() {
 		menuItems = new StringMap<Text>();
 
-		menuItemShader = Luxe.renderer.shaders.bitmapfont.shader.clone();
+		menuItemShader = Luxe.renderer.shaders.bitmapfont.shader.clone('menu-item-shader');
 
 		menuItems.set('play', new Text({
 			font: titleFont,
